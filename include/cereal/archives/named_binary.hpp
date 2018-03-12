@@ -56,7 +56,7 @@ namespace cereal
       {
           std::stringstream itsStream;
           std::size_t itsSize = 0;
-          std::string itsName;
+          std::string itsName = "";
           bool written = false;
       };
 
@@ -104,15 +104,13 @@ namespace cereal
             itsStream.put((node.itsSize >> 8*i) & 0xF);
           }
 
-
-          int writtenSize = 0;
-          for (; writtenSize < node.itsSize && node.itsStream.rdbuf()->in_avail(); ++writtenSize){
-            if (!(itsStream.rdbuf()->sputc(node.itsStream.rdbuf()->sgetc()))){
-                break;
-            }
+          std::string value_str = node.itsStream.str();
+          const int writtenSize = itsStream.rdbuf()->sputn(&value_str[0], std::min(value_str.size(), node.itsSize));
+          if(writtenSize != node.itsSize){
+              node.itsStream.seekg(0, std::ios::beg);
+              const size_t avail = node.itsStream.rdbuf()->in_avail();
+              throw Exception("Failed to write " + std::to_string(node.itsSize) + " bytes to output stream! Wrote " + std::to_string(writtenSize));
           }
-          if(writtenSize != node.itsSize)
-            throw Exception("Failed to write " + std::to_string(node.itsSize) + " bytes to output stream! Wrote " + std::to_string(writtenSize));
           itsNodes.pop();
       }
 
@@ -163,7 +161,9 @@ namespace cereal
       NamedBinaryInputArchive(std::istream & stream) :
         InputArchive<NamedBinaryInputArchive, AllowEmptyClassElision>(this),
         itsStream(stream)
-      { }
+      {
+
+      }
 
       ~NamedBinaryInputArchive() CEREAL_NOEXCEPT = default;
 
