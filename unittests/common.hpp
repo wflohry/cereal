@@ -53,6 +53,7 @@
 #include <cereal/archives/portable_binary.hpp>
 #include <cereal/archives/xml.hpp>
 #include <cereal/archives/json.hpp>
+#include <cereal/archives/named_binary.hpp>
 #include <limits>
 #include <random>
 

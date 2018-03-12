@@ -39,4 +39,9 @@ TEST_CASE("json_unordered_loads")
   test_unordered_loads<cereal::JSONInputArchive, cereal::JSONOutputArchive>();
 }
 
+TEST_CASE("named_binary_unordered_loads")
+{
+ test_unordered_loads<cereal::NamedBinaryInputArchive, cereal::NamedBinaryOutputArchive>();
+}
+
 TEST_SUITE_END();
