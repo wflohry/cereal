@@ -490,6 +490,12 @@ CEREAL_RAPIDJSON_NAMESPACE_END
 #define CEREAL_RAPIDJSON_VERSION_CODE(x,y,z) \
   (((x)*100000) + ((y)*100) + (z))
 
+#if defined(__has_builtin)
+#define CEREAL_RAPIDJSON_HAS_BUILTIN(x) __has_builtin(x)
+#else
+#define CEREAL_RAPIDJSON_HAS_BUILTIN(x) 0
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 // CEREAL_RAPIDJSON_DIAG_PUSH/POP, CEREAL_RAPIDJSON_DIAG_OFF
 
@@ -591,6 +597,19 @@ CEREAL_RAPIDJSON_NAMESPACE_END
 #endif
 #endif // CEREAL_RAPIDJSON_HAS_CXX11_RANGE_FOR
 
+///////////////////////////////////////////////////////////////////////////////
+// C++17 features
+
+#if defined(__has_cpp_attribute)
+# if __has_cpp_attribute(fallthrough)
+#  define CEREAL_RAPIDJSON_DELIBERATE_FALLTHROUGH [[fallthrough]]
+# else
+#  define CEREAL_RAPIDJSON_DELIBERATE_FALLTHROUGH
+# endif
+#else
+# define CEREAL_RAPIDJSON_DELIBERATE_FALLTHROUGH
+#endif
+
 //!@endcond
 
 //! Assertion (in non-throwing contexts).
@@ -612,12 +631,29 @@ CEREAL_RAPIDJSON_NAMESPACE_END
 #if CEREAL_RAPIDJSON_HAS_CXX11_NOEXCEPT
 #define CEREAL_RAPIDJSON_NOEXCEPT_ASSERT(x)
 #else
-#define CEREAL_RAPIDJSON_NOEXCEPT_ASSERT(x) CEREAL_RAPIDJSON_ASSERT(x)
+#include <cassert>
+#define CEREAL_RAPIDJSON_NOEXCEPT_ASSERT(x) assert(x)
 #endif // CEREAL_RAPIDJSON_HAS_CXX11_NOEXCEPT
 #else
 #define CEREAL_RAPIDJSON_NOEXCEPT_ASSERT(x) CEREAL_RAPIDJSON_ASSERT(x)
 #endif // CEREAL_RAPIDJSON_ASSERT_THROWS
 #endif // CEREAL_RAPIDJSON_NOEXCEPT_ASSERT
+
+///////////////////////////////////////////////////////////////////////////////
+// malloc/realloc/free
+
+#ifndef CEREAL_RAPIDJSON_MALLOC
+///! customization point for global \c malloc
+#define CEREAL_RAPIDJSON_MALLOC(size) std::malloc(size)
+#endif
+#ifndef CEREAL_RAPIDJSON_REALLOC
+///! customization point for global \c realloc
+#define CEREAL_RAPIDJSON_REALLOC(ptr, new_size) std::realloc(ptr, new_size)
+#endif
+#ifndef CEREAL_RAPIDJSON_FREE
+///! customization point for global \c free
+#define CEREAL_RAPIDJSON_FREE(ptr) std::free(ptr)
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 // new/delete

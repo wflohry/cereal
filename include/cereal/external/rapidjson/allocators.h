@@ -77,19 +77,19 @@ public:
     static const bool kNeedFree = true;
     void* Malloc(size_t size) { 
         if (size) //  behavior of malloc(0) is implementation defined.
-            return std::malloc(size);
+            return CEREAL_RAPIDJSON_MALLOC(size);
         else
             return NULL; // standardize to returning NULL.
     }
     void* Realloc(void* originalPtr, size_t originalSize, size_t newSize) {
         (void)originalSize;
         if (newSize == 0) {
-            std::free(originalPtr);
+            CEREAL_RAPIDJSON_FREE(originalPtr);
             return NULL;
         }
-        return std::realloc(originalPtr, newSize);
+        return CEREAL_RAPIDJSON_REALLOC(originalPtr, newSize);
     }
-    static void Free(void *ptr) { std::free(ptr); }
+    static void Free(void *ptr) { CEREAL_RAPIDJSON_FREE(ptr); }
 };
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -23,7 +23,6 @@
 CEREAL_RAPIDJSON_DIAG_PUSH
 CEREAL_RAPIDJSON_DIAG_OFF(padded)
 CEREAL_RAPIDJSON_DIAG_OFF(switch-enum)
-CEREAL_RAPIDJSON_DIAG_OFF(implicit-fallthrough)
 #elif defined(_MSC_VER)
 CEREAL_RAPIDJSON_DIAG_PUSH
 CEREAL_RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
@@ -32,9 +31,6 @@ CEREAL_RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
 #ifdef __GNUC__
 CEREAL_RAPIDJSON_DIAG_PUSH
 CEREAL_RAPIDJSON_DIAG_OFF(effc++)
-#if __GNUC__ >= 7
-CEREAL_RAPIDJSON_DIAG_OFF(implicit-fallthrough)
-#endif
 #endif
 
 #ifndef CEREAL_RAPIDJSON_REGEX_VERBOSE
@@ -291,6 +287,7 @@ private:
                     if (!CharacterEscape(ds, &codepoint))
                         return; // Unsupported escape character
                     // fall through to default
+                    CEREAL_RAPIDJSON_DELIBERATE_FALLTHROUGH;
 
                 default: // Pattern character
                     PushOperand(operandStack, codepoint);
@@ -520,6 +517,7 @@ private:
                 else if (!CharacterEscape(ds, &codepoint))
                     return false;
                 // fall through to default
+                CEREAL_RAPIDJSON_DELIBERATE_FALLTHROUGH;
 
             default:
                 switch (step) {
@@ -529,6 +527,7 @@ private:
                         break;
                     }
                     // fall through to step 0 for other characters
+                    CEREAL_RAPIDJSON_DELIBERATE_FALLTHROUGH;
 
                 case 0:
                     {
