@@ -12,32 +12,32 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
-#ifndef RAPIDJSON_INTERNAL_REGEX_H_
-#define RAPIDJSON_INTERNAL_REGEX_H_
+#ifndef CEREAL_RAPIDJSON_INTERNAL_REGEX_H_
+#define CEREAL_RAPIDJSON_INTERNAL_REGEX_H_
 
 #include "../allocators.h"
 #include "../stream.h"
 #include "stack.h"
 
 #ifdef __clang__
-RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(padded)
-RAPIDJSON_DIAG_OFF(switch-enum)
+CEREAL_RAPIDJSON_DIAG_PUSH
+CEREAL_RAPIDJSON_DIAG_OFF(padded)
+CEREAL_RAPIDJSON_DIAG_OFF(switch-enum)
 #elif defined(_MSC_VER)
-RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
+CEREAL_RAPIDJSON_DIAG_PUSH
+CEREAL_RAPIDJSON_DIAG_OFF(4512) // assignment operator could not be generated
 #endif
 
 #ifdef __GNUC__
-RAPIDJSON_DIAG_PUSH
-RAPIDJSON_DIAG_OFF(effc++)
+CEREAL_RAPIDJSON_DIAG_PUSH
+CEREAL_RAPIDJSON_DIAG_OFF(effc++)
 #endif
 
-#ifndef RAPIDJSON_REGEX_VERBOSE
-#define RAPIDJSON_REGEX_VERBOSE 0
+#ifndef CEREAL_RAPIDJSON_REGEX_VERBOSE
+#define CEREAL_RAPIDJSON_REGEX_VERBOSE 0
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+CEREAL_RAPIDJSON_NAMESPACE_BEGIN
 namespace internal {
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -114,7 +114,7 @@ public:
     template <typename, typename> friend class GenericRegexSearch;
 
     GenericRegex(const Ch* source, Allocator* allocator = 0) : 
-        ownAllocator_(allocator ? 0 : RAPIDJSON_NEW(Allocator)()), allocator_(allocator ? allocator : ownAllocator_), 
+        ownAllocator_(allocator ? 0 : CEREAL_RAPIDJSON_NEW(Allocator)()), allocator_(allocator ? allocator : ownAllocator_), 
         states_(allocator_, 256), ranges_(allocator_, 256), root_(kRegexInvalidState), stateCount_(), rangeCount_(), 
         anchorBegin_(), anchorEnd_()
     {
@@ -125,7 +125,7 @@ public:
 
     ~GenericRegex()
     {
-        RAPIDJSON_DELETE(ownAllocator_);
+        CEREAL_RAPIDJSON_DELETE(ownAllocator_);
     }
 
     bool IsValid() const {
@@ -167,22 +167,22 @@ private:
     };
 
     State& GetState(SizeType index) {
-        RAPIDJSON_ASSERT(index < stateCount_);
+        CEREAL_RAPIDJSON_ASSERT(index < stateCount_);
         return states_.template Bottom<State>()[index];
     }
 
     const State& GetState(SizeType index) const {
-        RAPIDJSON_ASSERT(index < stateCount_);
+        CEREAL_RAPIDJSON_ASSERT(index < stateCount_);
         return states_.template Bottom<State>()[index];
     }
 
     Range& GetRange(SizeType index) {
-        RAPIDJSON_ASSERT(index < rangeCount_);
+        CEREAL_RAPIDJSON_ASSERT(index < rangeCount_);
         return ranges_.template Bottom<Range>()[index];
     }
 
     const Range& GetRange(SizeType index) const {
-        RAPIDJSON_ASSERT(index < rangeCount_);
+        CEREAL_RAPIDJSON_ASSERT(index < rangeCount_);
         return ranges_.template Bottom<Range>()[index];
     }
 
@@ -287,7 +287,7 @@ private:
                     if (!CharacterEscape(ds, &codepoint))
                         return; // Unsupported escape character
                     // fall through to default
-                    RAPIDJSON_DELIBERATE_FALLTHROUGH;
+                    CEREAL_RAPIDJSON_DELIBERATE_FALLTHROUGH;
 
                 default: // Pattern character
                     PushOperand(operandStack, codepoint);
@@ -305,7 +305,7 @@ private:
             Patch(e->out, NewState(kRegexInvalidState, kRegexInvalidState, 0));
             root_ = e->start;
 
-#if RAPIDJSON_REGEX_VERBOSE
+#if CEREAL_RAPIDJSON_REGEX_VERBOSE
             printf("root: %d\n", root_);
             for (SizeType i = 0; i < stateCount_ ; i++) {
                 State& s = GetState(i);
@@ -354,7 +354,7 @@ private:
     bool Eval(Stack<Allocator>& operandStack, Operator op) {
         switch (op) {
             case kConcatenation:
-                RAPIDJSON_ASSERT(operandStack.GetSize() >= sizeof(Frag) * 2);
+                CEREAL_RAPIDJSON_ASSERT(operandStack.GetSize() >= sizeof(Frag) * 2);
                 {
                     Frag e2 = *operandStack.template Pop<Frag>(1);
                     Frag e1 = *operandStack.template Pop<Frag>(1);
@@ -409,8 +409,8 @@ private:
     }
 
     bool EvalQuantifier(Stack<Allocator>& operandStack, unsigned n, unsigned m) {
-        RAPIDJSON_ASSERT(n <= m);
-        RAPIDJSON_ASSERT(operandStack.GetSize() >= sizeof(Frag));
+        CEREAL_RAPIDJSON_ASSERT(n <= m);
+        CEREAL_RAPIDJSON_ASSERT(operandStack.GetSize() >= sizeof(Frag));
 
         if (n == 0) {
             if (m == 0)                             // a{0} not support
@@ -501,7 +501,7 @@ private:
                     return false;   // Error: nothing inside []
                 if (step == 2) { // Add trailing '-'
                     SizeType r = NewRange('-');
-                    RAPIDJSON_ASSERT(current != kRegexInvalidRange);
+                    CEREAL_RAPIDJSON_ASSERT(current != kRegexInvalidRange);
                     GetRange(current).next = r;
                 }
                 if (negate)
@@ -517,7 +517,7 @@ private:
                 else if (!CharacterEscape(ds, &codepoint))
                     return false;
                 // fall through to default
-                RAPIDJSON_DELIBERATE_FALLTHROUGH;
+                CEREAL_RAPIDJSON_DELIBERATE_FALLTHROUGH;
 
             default:
                 switch (step) {
@@ -527,7 +527,7 @@ private:
                         break;
                     }
                     // fall through to step 0 for other characters
-                    RAPIDJSON_DELIBERATE_FALLTHROUGH;
+                    CEREAL_RAPIDJSON_DELIBERATE_FALLTHROUGH;
 
                 case 0:
                     {
@@ -542,7 +542,7 @@ private:
                     break;
 
                 default:
-                    RAPIDJSON_ASSERT(step == 2);
+                    CEREAL_RAPIDJSON_ASSERT(step == 2);
                     GetRange(current).end = codepoint;
                     step = 0;
                 }
@@ -612,9 +612,9 @@ public:
         regex_(regex), allocator_(allocator), ownAllocator_(0),
         state0_(allocator, 0), state1_(allocator, 0), stateSet_()
     {
-        RAPIDJSON_ASSERT(regex_.IsValid());
+        CEREAL_RAPIDJSON_ASSERT(regex_.IsValid());
         if (!allocator_)
-            ownAllocator_ = allocator_ = RAPIDJSON_NEW(Allocator)();
+            ownAllocator_ = allocator_ = CEREAL_RAPIDJSON_NEW(Allocator)();
         stateSet_ = static_cast<unsigned*>(allocator_->Malloc(GetStateSetSize()));
         state0_.template Reserve<SizeType>(regex_.stateCount_);
         state1_.template Reserve<SizeType>(regex_.stateCount_);
@@ -622,7 +622,7 @@ public:
 
     ~GenericRegexSearch() {
         Allocator::Free(stateSet_);
-        RAPIDJSON_DELETE(ownAllocator_);
+        CEREAL_RAPIDJSON_DELETE(ownAllocator_);
     }
 
     template <typename InputStream>
@@ -689,7 +689,7 @@ private:
 
     // Return whether the added states is a match state
     bool AddState(Stack<Allocator>& l, SizeType index) {
-        RAPIDJSON_ASSERT(index != kRegexInvalidState);
+        CEREAL_RAPIDJSON_ASSERT(index != kRegexInvalidState);
 
         const State& s = regex_.GetState(index);
         if (s.out1 != kRegexInvalidState) { // Split
@@ -726,14 +726,14 @@ typedef GenericRegex<UTF8<> > Regex;
 typedef GenericRegexSearch<Regex> RegexSearch;
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+CEREAL_RAPIDJSON_NAMESPACE_END
 
 #ifdef __GNUC__
-RAPIDJSON_DIAG_POP
+CEREAL_RAPIDJSON_DIAG_POP
 #endif
 
 #if defined(__clang__) || defined(_MSC_VER)
-RAPIDJSON_DIAG_POP
+CEREAL_RAPIDJSON_DIAG_POP
 #endif
 
-#endif // RAPIDJSON_INTERNAL_REGEX_H_
+#endif // CEREAL_RAPIDJSON_INTERNAL_REGEX_H_

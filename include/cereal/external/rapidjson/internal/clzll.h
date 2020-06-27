@@ -12,8 +12,8 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-#ifndef RAPIDJSON_CLZLL_H_
-#define RAPIDJSON_CLZLL_H_
+#ifndef CEREAL_RAPIDJSON_CLZLL_H_
+#define CEREAL_RAPIDJSON_CLZLL_H_
 
 #include "../rapidjson.h"
 
@@ -26,13 +26,13 @@
 #endif
 #endif
 
-RAPIDJSON_NAMESPACE_BEGIN
+CEREAL_RAPIDJSON_NAMESPACE_BEGIN
 namespace internal {
 
 inline uint32_t clzll(uint64_t x) {
     // Passing 0 to __builtin_clzll is UB in GCC and results in an
     // infinite loop in the software implementation.
-    RAPIDJSON_ASSERT(x != 0);
+    CEREAL_RAPIDJSON_ASSERT(x != 0);
 
 #if defined(_MSC_VER)
     unsigned long r = 0;
@@ -48,7 +48,7 @@ inline uint32_t clzll(uint64_t x) {
 #endif // _WIN64
 
     return 63 - r;
-#elif (defined(__GNUC__) && __GNUC__ >= 4) || RAPIDJSON_HAS_BUILTIN(__builtin_clzll)
+#elif (defined(__GNUC__) && __GNUC__ >= 4) || CEREAL_RAPIDJSON_HAS_BUILTIN(__builtin_clzll)
     // __builtin_clzll wrapper
     return static_cast<uint32_t>(__builtin_clzll(x));
 #else
@@ -63,9 +63,9 @@ inline uint32_t clzll(uint64_t x) {
 #endif // _MSC_VER
 }
 
-#define RAPIDJSON_CLZLL RAPIDJSON_NAMESPACE::internal::clzll
+#define CEREAL_RAPIDJSON_CLZLL CEREAL_RAPIDJSON_NAMESPACE::internal::clzll
 
 } // namespace internal
-RAPIDJSON_NAMESPACE_END
+CEREAL_RAPIDJSON_NAMESPACE_END
 
-#endif // RAPIDJSON_CLZLL_H_
+#endif // CEREAL_RAPIDJSON_CLZLL_H_
