@@ -12,23 +12,23 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the
 // specific language governing permissions and limitations under the License.
 
-#ifndef CEREAL_RAPIDJSON_CURSORSTREAMWRAPPER_H_
-#define CEREAL_RAPIDJSON_CURSORSTREAMWRAPPER_H_
+#ifndef RAPIDJSON_CURSORSTREAMWRAPPER_H_
+#define RAPIDJSON_CURSORSTREAMWRAPPER_H_
 
 #include "stream.h"
 
 #if defined(__GNUC__)
-CEREAL_RAPIDJSON_DIAG_PUSH
-CEREAL_RAPIDJSON_DIAG_OFF(effc++)
+RAPIDJSON_DIAG_PUSH
+RAPIDJSON_DIAG_OFF(effc++)
 #endif
 
 #if defined(_MSC_VER) && _MSC_VER <= 1800
-CEREAL_RAPIDJSON_DIAG_PUSH
-CEREAL_RAPIDJSON_DIAG_OFF(4702)  // unreachable code
-CEREAL_RAPIDJSON_DIAG_OFF(4512)  // assignment operator could not be generated
+RAPIDJSON_DIAG_PUSH
+RAPIDJSON_DIAG_OFF(4702)  // unreachable code
+RAPIDJSON_DIAG_OFF(4512)  // assignment operator could not be generated
 #endif
 
-CEREAL_RAPIDJSON_NAMESPACE_BEGIN
+RAPIDJSON_NAMESPACE_BEGIN
 
 
 //! Cursor stream wrapper for counting line and column number if error exists.
@@ -66,13 +66,13 @@ private:
 };
 
 #if defined(_MSC_VER) && _MSC_VER <= 1800
-CEREAL_RAPIDJSON_DIAG_POP
+RAPIDJSON_DIAG_POP
 #endif
 
 #if defined(__GNUC__)
-CEREAL_RAPIDJSON_DIAG_POP
+RAPIDJSON_DIAG_POP
 #endif
 
-CEREAL_RAPIDJSON_NAMESPACE_END
+RAPIDJSON_NAMESPACE_END
 
-#endif // CEREAL_RAPIDJSON_CURSORSTREAMWRAPPER_H_
+#endif // RAPIDJSON_CURSORSTREAMWRAPPER_H_

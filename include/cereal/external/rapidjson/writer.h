@@ -12,10 +12,11 @@
 // CONDITIONS OF ANY KIND, either express or implied. See the License for the 
 // specific language governing permissions and limitations under the License.
 
-#ifndef CEREAL_RAPIDJSON_WRITER_H_
-#define CEREAL_RAPIDJSON_WRITER_H_
+#ifndef RAPIDJSON_WRITER_H_
+#define RAPIDJSON_WRITER_H_
 
 #include "stream.h"
+#include "internal/clzll.h"
 #include "internal/meta.h"
 #include "internal/stack.h"
 #include "internal/strfunc.h"
@@ -24,41 +25,41 @@
 #include "stringbuffer.h"
 #include <new>      // placement new
 
-#if defined(CEREAL_RAPIDJSON_SIMD) && defined(_MSC_VER)
+#if defined(RAPIDJSON_SIMD) && defined(_MSC_VER)
 #include <intrin.h>
 #pragma intrinsic(_BitScanForward)
 #endif
-#ifdef CEREAL_RAPIDJSON_SSE42
+#ifdef RAPIDJSON_SSE42
 #include <nmmintrin.h>
-#elif defined(CEREAL_RAPIDJSON_SSE2)
+#elif defined(RAPIDJSON_SSE2)
 #include <emmintrin.h>
-#elif defined(CEREAL_RAPIDJSON_NEON)
+#elif defined(RAPIDJSON_NEON)
 #include <arm_neon.h>
 #endif
 
 #ifdef __clang__
-CEREAL_RAPIDJSON_DIAG_PUSH
-CEREAL_RAPIDJSON_DIAG_OFF(padded)
-CEREAL_RAPIDJSON_DIAG_OFF(unreachable-code)
-CEREAL_RAPIDJSON_DIAG_OFF(c++98-compat)
+RAPIDJSON_DIAG_PUSH
+RAPIDJSON_DIAG_OFF(padded)
+RAPIDJSON_DIAG_OFF(unreachable-code)
+RAPIDJSON_DIAG_OFF(c++98-compat)
 #elif defined(_MSC_VER)
-CEREAL_RAPIDJSON_DIAG_PUSH
-CEREAL_RAPIDJSON_DIAG_OFF(4127) // conditional expression is constant
+RAPIDJSON_DIAG_PUSH
+RAPIDJSON_DIAG_OFF(4127) // conditional expression is constant
 #endif
 
-CEREAL_RAPIDJSON_NAMESPACE_BEGIN
+RAPIDJSON_NAMESPACE_BEGIN
 
 ///////////////////////////////////////////////////////////////////////////////
 // WriteFlag
 
-/*! \def CEREAL_RAPIDJSON_WRITE_DEFAULT_FLAGS 
-    \ingroup CEREAL_RAPIDJSON_CONFIG
+/*! \def RAPIDJSON_WRITE_DEFAULT_FLAGS 
+    \ingroup RAPIDJSON_CONFIG
     \brief User-defined kWriteDefaultFlags definition.
 
     User can define this as any \c WriteFlag combinations.
 */
-#ifndef CEREAL_RAPIDJSON_WRITE_DEFAULT_FLAGS
-#define CEREAL_RAPIDJSON_WRITE_DEFAULT_FLAGS kWriteNoFlags
+#ifndef RAPIDJSON_WRITE_DEFAULT_FLAGS
+#define RAPIDJSON_WRITE_DEFAULT_FLAGS kWriteNoFlags
 #endif
 
 //! Combination of writeFlags
@@ -66,7 +67,7 @@ enum WriteFlag {
     kWriteNoFlags = 0,              //!< No flags are set.
     kWriteValidateEncodingFlag = 1, //!< Validate encoding of JSON strings.
     kWriteNanAndInfFlag = 2,        //!< Allow writing of Infinity, -Infinity and NaN.
-    kWriteDefaultFlags = CEREAL_RAPIDJSON_WRITE_DEFAULT_FLAGS  //!< Default write flags. Can be customized by defining CEREAL_RAPIDJSON_WRITE_DEFAULT_FLAGS
+    kWriteDefaultFlags = RAPIDJSON_WRITE_DEFAULT_FLAGS  //!< Default write flags. Can be customized by defining RAPIDJSON_WRITE_DEFAULT_FLAGS
 };
 
 //! JSON writer
@@ -105,7 +106,7 @@ public:
     Writer(StackAllocator* allocator = 0, size_t levelDepth = kDefaultLevelDepth) :
         os_(0), level_stack_(allocator, levelDepth * sizeof(Level)), maxDecimalPlaces_(kDefaultMaxDecimalPlaces), hasRoot_(false) {}
 
-#if CEREAL_RAPIDJSON_HAS_CXX11_RVALUE_REFS
+#if RAPIDJSON_HAS_CXX11_RVALUE_REFS
     Writer(Writer&& rhs) :
         os_(rhs.os_), level_stack_(std::move(rhs.level_stack_)), maxDecimalPlaces_(rhs.maxDecimalPlaces_), hasRoot_(rhs.hasRoot_) {
         rhs.os_ = 0;
@@ -193,20 +194,20 @@ public:
     bool Double(double d)       { Prefix(kNumberType); return EndValue(WriteDouble(d)); }
 
     bool RawNumber(const Ch* str, SizeType length, bool copy = false) {
-        CEREAL_RAPIDJSON_ASSERT(str != 0);
+        RAPIDJSON_ASSERT(str != 0);
         (void)copy;
         Prefix(kNumberType);
         return EndValue(WriteString(str, length));
     }
 
     bool String(const Ch* str, SizeType length, bool copy = false) {
-        CEREAL_RAPIDJSON_ASSERT(str != 0);
+        RAPIDJSON_ASSERT(str != 0);
         (void)copy;
         Prefix(kStringType);
         return EndValue(WriteString(str, length));
     }
 
-#if CEREAL_RAPIDJSON_HAS_STDSTRING
+#if RAPIDJSON_HAS_STDSTRING
     bool String(const std::basic_string<Ch>& str) {
         return String(str.data(), SizeType(str.size()));
     }
@@ -220,18 +221,18 @@ public:
 
     bool Key(const Ch* str, SizeType length, bool copy = false) { return String(str, length, copy); }
 
-#if CEREAL_RAPIDJSON_HAS_STDSTRING
+#if RAPIDJSON_HAS_STDSTRING
     bool Key(const std::basic_string<Ch>& str)
     {
       return Key(str.data(), SizeType(str.size()));
     }
 #endif
-	
+
     bool EndObject(SizeType memberCount = 0) {
         (void)memberCount;
-        CEREAL_RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level)); // not inside an Object
-        CEREAL_RAPIDJSON_ASSERT(!level_stack_.template Top<Level>()->inArray); // currently inside an Array, not Object
-        CEREAL_RAPIDJSON_ASSERT(0 == level_stack_.template Top<Level>()->valueCount % 2); // Object has a Key without a Value
+        RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level)); // not inside an Object
+        RAPIDJSON_ASSERT(!level_stack_.template Top<Level>()->inArray); // currently inside an Array, not Object
+        RAPIDJSON_ASSERT(0 == level_stack_.template Top<Level>()->valueCount % 2); // Object has a Key without a Value
         level_stack_.template Pop<Level>(1);
         return EndValue(WriteEndObject());
     }
@@ -244,8 +245,8 @@ public:
 
     bool EndArray(SizeType elementCount = 0) {
         (void)elementCount;
-        CEREAL_RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level));
-        CEREAL_RAPIDJSON_ASSERT(level_stack_.template Top<Level>()->inArray);
+        RAPIDJSON_ASSERT(level_stack_.GetSize() >= sizeof(Level));
+        RAPIDJSON_ASSERT(level_stack_.template Top<Level>()->inArray);
         level_stack_.template Pop<Level>(1);
         return EndValue(WriteEndArray());
     }
@@ -269,7 +270,7 @@ public:
         \param type Type of the root of json.
     */
     bool RawValue(const Ch* json, size_t length, Type type) {
-        CEREAL_RAPIDJSON_ASSERT(json != 0);
+        RAPIDJSON_ASSERT(json != 0);
         Prefix(type);
         return EndValue(WriteRawValue(json, length));
     }
@@ -282,6 +283,8 @@ public:
         os_->Flush();
     }
 
+    static const size_t kDefaultLevelDepth = 32;
+
 protected:
     //! Information for each nested level
     struct Level {
@@ -289,8 +292,6 @@ protected:
         size_t valueCount;  //!< number of values in this level
         bool inArray;       //!< true if in array, otherwise in object
     };
-
-    static const size_t kDefaultLevelDepth = 32;
 
     bool WriteNull()  {
         PutReserve(*os_, 4);
@@ -399,7 +400,7 @@ protected:
             if (!TargetEncoding::supportUnicode && static_cast<unsigned>(c) >= 0x80) {
                 // Unicode escaping
                 unsigned codepoint;
-                if (CEREAL_RAPIDJSON_UNLIKELY(!SourceEncoding::Decode(is, &codepoint)))
+                if (RAPIDJSON_UNLIKELY(!SourceEncoding::Decode(is, &codepoint)))
                     return false;
                 PutUnsafe(*os_, '\\');
                 PutUnsafe(*os_, 'u');
@@ -410,7 +411,7 @@ protected:
                     PutUnsafe(*os_, hexDigits[(codepoint      ) & 15]);
                 }
                 else {
-                    CEREAL_RAPIDJSON_ASSERT(codepoint >= 0x010000 && codepoint <= 0x10FFFF);
+                    RAPIDJSON_ASSERT(codepoint >= 0x010000 && codepoint <= 0x10FFFF);
                     // Surrogate pair
                     unsigned s = codepoint - 0x010000;
                     unsigned lead = (s >> 10) + 0xD800;
@@ -427,7 +428,7 @@ protected:
                     PutUnsafe(*os_, hexDigits[(trail      ) & 15]);                    
                 }
             }
-            else if ((sizeof(Ch) == 1 || static_cast<unsigned>(c) < 256) && CEREAL_RAPIDJSON_UNLIKELY(escape[static_cast<unsigned char>(c)]))  {
+            else if ((sizeof(Ch) == 1 || static_cast<unsigned>(c) < 256) && RAPIDJSON_UNLIKELY(escape[static_cast<unsigned char>(c)]))  {
                 is.Take();
                 PutUnsafe(*os_, '\\');
                 PutUnsafe(*os_, static_cast<typename OutputStream::Ch>(escape[static_cast<unsigned char>(c)]));
@@ -438,7 +439,7 @@ protected:
                     PutUnsafe(*os_, hexDigits[static_cast<unsigned char>(c) & 0xF]);
                 }
             }
-            else if (CEREAL_RAPIDJSON_UNLIKELY(!(writeFlags & kWriteValidateEncodingFlag ? 
+            else if (RAPIDJSON_UNLIKELY(!(writeFlags & kWriteValidateEncodingFlag ? 
                 Transcoder<SourceEncoding, TargetEncoding>::Validate(is, *os_) :
                 Transcoder<SourceEncoding, TargetEncoding>::TranscodeUnsafe(is, *os_))))
                 return false;
@@ -448,7 +449,7 @@ protected:
     }
 
     bool ScanWriteUnescapedString(GenericStringStream<SourceEncoding>& is, size_t length) {
-        return CEREAL_RAPIDJSON_LIKELY(is.Tell() < length);
+        return RAPIDJSON_LIKELY(is.Tell() < length);
     }
 
     bool WriteStartObject() { os_->Put('{'); return true; }
@@ -459,9 +460,9 @@ protected:
     bool WriteRawValue(const Ch* json, size_t length) {
         PutReserve(*os_, length);
         GenericStringStream<SourceEncoding> is(json);
-        while (CEREAL_RAPIDJSON_LIKELY(is.Tell() < length)) {
-            CEREAL_RAPIDJSON_ASSERT(is.Peek() != '\0');
-            if (CEREAL_RAPIDJSON_UNLIKELY(!(writeFlags & kWriteValidateEncodingFlag ? 
+        while (RAPIDJSON_LIKELY(is.Tell() < length)) {
+            RAPIDJSON_ASSERT(is.Peek() != '\0');
+            if (RAPIDJSON_UNLIKELY(!(writeFlags & kWriteValidateEncodingFlag ? 
                 Transcoder<SourceEncoding, TargetEncoding>::Validate(is, *os_) :
                 Transcoder<SourceEncoding, TargetEncoding>::TranscodeUnsafe(is, *os_))))
                 return false;
@@ -471,7 +472,7 @@ protected:
 
     void Prefix(Type type) {
         (void)type;
-        if (CEREAL_RAPIDJSON_LIKELY(level_stack_.GetSize() != 0)) { // this value is not at root
+        if (RAPIDJSON_LIKELY(level_stack_.GetSize() != 0)) { // this value is not at root
             Level* level = level_stack_.template Top<Level>();
             if (level->valueCount > 0) {
                 if (level->inArray) 
@@ -480,18 +481,18 @@ protected:
                     os_->Put((level->valueCount % 2 == 0) ? ',' : ':');
             }
             if (!level->inArray && level->valueCount % 2 == 0)
-                CEREAL_RAPIDJSON_ASSERT(type == kStringType);  // if it's in object, then even number should be a name
+                RAPIDJSON_ASSERT(type == kStringType);  // if it's in object, then even number should be a name
             level->valueCount++;
         }
         else {
-            CEREAL_RAPIDJSON_ASSERT(!hasRoot_);    // Should only has one and only one root.
+            RAPIDJSON_ASSERT(!hasRoot_);    // Should only has one and only one root.
             hasRoot_ = true;
         }
     }
 
     // Flush the value if it is the top level one.
     bool EndValue(bool ret) {
-        if (CEREAL_RAPIDJSON_UNLIKELY(level_stack_.Empty()))   // end of json text
+        if (RAPIDJSON_UNLIKELY(level_stack_.Empty()))   // end of json text
             Flush();
         return ret;
     }
@@ -544,7 +545,7 @@ inline bool Writer<StringBuffer>::WriteUint64(uint64_t u) {
 template<>
 inline bool Writer<StringBuffer>::WriteDouble(double d) {
     if (internal::Double(d).IsNanOrInf()) {
-        // Note: This code path can only be reached if (CEREAL_RAPIDJSON_WRITE_DEFAULT_FLAGS & kWriteNanAndInfFlag).
+        // Note: This code path can only be reached if (RAPIDJSON_WRITE_DEFAULT_FLAGS & kWriteNanAndInfFlag).
         if (!(kWriteDefaultFlags & kWriteNanAndInfFlag))
             return false;
         if (internal::Double(d).IsNan()) {
@@ -569,13 +570,13 @@ inline bool Writer<StringBuffer>::WriteDouble(double d) {
     return true;
 }
 
-#if defined(CEREAL_RAPIDJSON_SSE2) || defined(CEREAL_RAPIDJSON_SSE42)
+#if defined(RAPIDJSON_SSE2) || defined(RAPIDJSON_SSE42)
 template<>
 inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, size_t length) {
     if (length < 16)
-        return CEREAL_RAPIDJSON_LIKELY(is.Tell() < length);
+        return RAPIDJSON_LIKELY(is.Tell() < length);
 
-    if (!CEREAL_RAPIDJSON_LIKELY(is.Tell() < length))
+    if (!RAPIDJSON_LIKELY(is.Tell() < length))
         return false;
 
     const char* p = is.src_;
@@ -588,7 +589,7 @@ inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, siz
     while (p != nextAligned)
         if (*p < 0x20 || *p == '\"' || *p == '\\') {
             is.src_ = p;
-            return CEREAL_RAPIDJSON_LIKELY(is.Tell() < length);
+            return RAPIDJSON_LIKELY(is.Tell() < length);
         }
         else
             os_->PutUnsafe(*p++);
@@ -608,7 +609,7 @@ inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, siz
         const __m128i t3 = _mm_cmpeq_epi8(_mm_max_epu8(s, sp), sp); // s < 0x20 <=> max(s, 0x1F) == 0x1F
         const __m128i x = _mm_or_si128(_mm_or_si128(t1, t2), t3);
         unsigned short r = static_cast<unsigned short>(_mm_movemask_epi8(x));
-        if (CEREAL_RAPIDJSON_UNLIKELY(r != 0)) {   // some of characters is escaped
+        if (RAPIDJSON_UNLIKELY(r != 0)) {   // some of characters is escaped
             SizeType len;
 #ifdef _MSC_VER         // Find the index of first escaped
             unsigned long offset;
@@ -628,15 +629,15 @@ inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, siz
     }
 
     is.src_ = p;
-    return CEREAL_RAPIDJSON_LIKELY(is.Tell() < length);
+    return RAPIDJSON_LIKELY(is.Tell() < length);
 }
-#elif defined(CEREAL_RAPIDJSON_NEON)
+#elif defined(RAPIDJSON_NEON)
 template<>
 inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, size_t length) {
     if (length < 16)
-        return CEREAL_RAPIDJSON_LIKELY(is.Tell() < length);
+        return RAPIDJSON_LIKELY(is.Tell() < length);
 
-    if (!CEREAL_RAPIDJSON_LIKELY(is.Tell() < length))
+    if (!RAPIDJSON_LIKELY(is.Tell() < length))
         return false;
 
     const char* p = is.src_;
@@ -649,7 +650,7 @@ inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, siz
     while (p != nextAligned)
         if (*p < 0x20 || *p == '\"' || *p == '\\') {
             is.src_ = p;
-            return CEREAL_RAPIDJSON_LIKELY(is.Tell() < length);
+            return RAPIDJSON_LIKELY(is.Tell() < length);
         }
         else
             os_->PutUnsafe(*p++);
@@ -668,23 +669,23 @@ inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, siz
         x = vorrq_u8(x, vcltq_u8(s, s3));
 
         x = vrev64q_u8(x);                     // Rev in 64
-        uint64_t low = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 0);   // extract
-        uint64_t high = vgetq_lane_u64(reinterpret_cast<uint64x2_t>(x), 1);  // extract
+        uint64_t low = vgetq_lane_u64(vreinterpretq_u64_u8(x), 0);   // extract
+        uint64_t high = vgetq_lane_u64(vreinterpretq_u64_u8(x), 1);  // extract
 
         SizeType len = 0;
         bool escaped = false;
         if (low == 0) {
             if (high != 0) {
-                unsigned lz = (unsigned)__builtin_clzll(high);
+                uint32_t lz = internal::clzll(high);
                 len = 8 + (lz >> 3);
                 escaped = true;
             }
         } else {
-            unsigned lz = (unsigned)__builtin_clzll(low);
+            uint32_t lz = internal::clzll(low);
             len = lz >> 3;
             escaped = true;
         }
-        if (CEREAL_RAPIDJSON_UNLIKELY(escaped)) {   // some of characters is escaped
+        if (RAPIDJSON_UNLIKELY(escaped)) {   // some of characters is escaped
             char* q = reinterpret_cast<char*>(os_->PushUnsafe(len));
             for (size_t i = 0; i < len; i++)
                 q[i] = p[i];
@@ -696,14 +697,14 @@ inline bool Writer<StringBuffer>::ScanWriteUnescapedString(StringStream& is, siz
     }
 
     is.src_ = p;
-    return CEREAL_RAPIDJSON_LIKELY(is.Tell() < length);
+    return RAPIDJSON_LIKELY(is.Tell() < length);
 }
-#endif // CEREAL_RAPIDJSON_NEON
+#endif // RAPIDJSON_NEON
 
-CEREAL_RAPIDJSON_NAMESPACE_END
+RAPIDJSON_NAMESPACE_END
 
 #if defined(_MSC_VER) || defined(__clang__)
-CEREAL_RAPIDJSON_DIAG_POP
+RAPIDJSON_DIAG_POP
 #endif
 
-#endif // CEREAL_RAPIDJSON_CEREAL_RAPIDJSON_H_
+#endif // RAPIDJSON_RAPIDJSON_H_
